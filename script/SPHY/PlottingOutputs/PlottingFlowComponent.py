@@ -20,7 +20,7 @@ import hydroeval as he
 figdir = ("C:/SPHY3/analysis/model_output/fig/") # directory to save figure
 plt.close('all')
 
-path = "C:/SPHY3/sphy_20230218/output_sphy_config_base16_5/"
+path = "C:/SPHY3/sphy_20230218/output_20230529/"
 dd = '01'
 mm = '01'
 yy = '2014'

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Loop throught folder to import modelled streamflow
+This script loops throught the folders and plots the modelled streamflow and streamflow components.
+Used when running mutliple files in a simple sensitivity analysis
 """
 
 import os
@@ -19,7 +20,7 @@ perf_list = pd.DataFrame(columns=['folder', 'NSE', 'KGE', 'RMSE', 'MARE', 'PBIAS
 #%% List of folder names
 
 # Get list of folders in the directory
-directory = "C:/SPHY3/sphy_20230218/"
+directory = "C:/SPHY3/sphy_20230218/snow"
 
 # Get list of folders in the directory
 folders = [f for f in os.listdir(directory) if os.path.isdir(os.path.join(directory, f)) and f.startswith("output_")]
@@ -96,9 +97,9 @@ for folder in folders:
     base = mod[['Outlet']]
     
     # Import modelled Baseflow
-    mod  = imp.importtss(yy, mm, dd, path + "/GwreDTS.tss",  ['Outlet', 'GW 1', 'GW 2', 'GW 3', 'AWS', 'soil'])
-    mod = mod.where((mod > min_val) & (mod < max_val), np.nan)
-    rainf = mod[['AWS']]
+    #mod  = imp.importtss(yy, mm, dd, path + "/GwreDTS.tss",  ['Outlet', 'GW 1', 'GW 2', 'GW 3', 'AWS', 'soil'])
+    #mod = mod.where((mod > min_val) & (mod < max_val), np.nan)
+    #rainf = mod[['AWS']]
     
     # Label and variable names
     modname = 'Outlet'  # name of modelled variable column
@@ -112,8 +113,8 @@ for folder in folders:
     savetitle = 'ModelledFlowComponent'  # name of saved file
 
     # Specify start and end dates for plotting
-    start_date = '2017-05-01'
-    end_date = '2017-12-31'
+    start_date = '2014-05-01'
+    end_date = '2014-12-31'
     
     # Create subplots
     # Create subplots
@@ -121,7 +122,7 @@ for folder in folders:
 
     # Plot modelled streamflow components within the specified date range
     ax.plot(mod.loc[start_date:end_date].index, qall[modname].loc[start_date:end_date], label=label1, color='red')
-    ax.plot(meas.loc[start_date:end_date].index, meas[measname].loc[start_date:end_date], label='Measured', color='black')
+    #ax.plot(meas.loc[start_date:end_date].index, meas[measname].loc[start_date:end_date], label='Measured', color='black')
     ax.plot(mod.loc[start_date:end_date].index, glac[modname].loc[start_date:end_date], label=label2, color='blue')
     ax.plot(mod.loc[start_date:end_date].index, rain[modname].loc[start_date:end_date], label=label3, color='magenta')
     ax.plot(mod.loc[start_date:end_date].index, snow[modname].loc[start_date:end_date], label=label4, color='cyan')
@@ -135,12 +136,18 @@ for folder in folders:
     
     # Set x-axis tick labels rotation
     ax.set_xticklabels(ax.get_xticklabels(), rotation=30)
+    # Set y-axis limits
+    ax.set_ylim([0, 12])
+
     # Save figure as .pdf
     plt.savefig(figdir + folder + 'FlowComp.pdf', format='pdf', dpi=300, bbox_inches='tight')
     # Save figure as .png
     plt.savefig(figdir + folder + 'FlowComp.png', dpi=300, bbox_inches='tight')
 
     plt.show()
+    
+    
+    
     
     # Calculate the sum of plotted part fo the time series
     glac_filtered = glac.loc[start_date:end_date]

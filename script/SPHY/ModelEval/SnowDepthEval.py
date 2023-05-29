@@ -19,7 +19,7 @@ plt.close('all')
 
 #%% Model output
 # Load modelled snowpack 
-mod  = imp.importtss("2014", "01", "01", "C:\\SPHY3\\sphy_20230218\\output_sphy_config_base16_5\\SnowSDTS.tss",  ['Outlet', 'GW 1', 'GW 2', 'GW 3', 'AWS', 'soil'])
+mod  = imp.importtss("2014", "01", "01", "C:\\SPHY3\\sphy_20230218\\output_20230529\\SnowSDTS.tss",  ['Outlet', 'GW 1', 'GW 2', 'GW 3', 'AWS', 'soil'])
 
 # Keep only the outlet streamflow
 mod = mod[['AWS']]

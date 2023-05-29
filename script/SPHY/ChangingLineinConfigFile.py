@@ -153,13 +153,13 @@ simname = 'SnowMF'
 simpath = 'C:/SPHY3/sphy_20230218/'
 outpath = simpath[9:]
 # Path to the input text file - a generic congif file that will be changed
-input_file_path = r"C:/SPHY3/GlacRunoffFrac_0_4.cfg"
+input_file_path = r"C:/SPHY3/sphy_config_20230524.cfg"
 
 # Path to the output files
 output_configfile_base= "C:/SPHY3/" + simname +"_"
 
 # Values of the parameter to test
-values = [4,8,12] # 90% goes to glacier runoff if 0.9
+values = [2,4,8,12,16] # 
 
 # Loop through the values and create a new output file for each value
 for value in values:
@@ -190,18 +190,17 @@ for value in values:
     print("New SPHY configuratio file: {}".format(output_configfile))
 ##################################################    
 #%% s critical temp #################################################
-# lets go with 0.6 for now
 simname = 'SnowMF'
 simpath = 'C:/SPHY3/sphy_20230218/'
 outpath = simpath[9:]
 # Path to the input text file - a generic congif file that will be changed
-input_file_path = r"C:/SPHY3/GlacRunoffFrac_0_4.cfg"
+input_file_path = r"C:/SPHY3/sphy_config_20230524.cfg"
 
 # Path to the output files
 output_configfile_base= "C:/SPHY3/" + simname +"_"
 
 # Values of the parameter to test
-values = [-4, -2, 0] # 90% goes to glacier runoff if 0.9
+values = [-4, -2, 0] # 
 
 # Loop through the values and create a new output file for each value
 for value in values:

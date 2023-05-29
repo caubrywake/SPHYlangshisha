@@ -21,7 +21,7 @@ figdir = ("C:/SPHY3/analysis/model_output/fig/modeleval/") # directory to save f
 plt.close('all')
 
 # Import modelled streamflow
-mod  = imp.importtss("2014", "01", "01", "C:\\SPHY3\\sphy_20230218\\output_sphy_config_base16_5\\QAllDTS.tss",  ['Outlet', 'GW 1', 'GW 2', 'GW 3', 'AWS', 'GW1 soil'])
+mod  = imp.importtss("2014", "01", "01", "C:\\SPHY3\\sphy_20230218\\output_20230529\\QAllDTS.tss",  ['Outlet', 'GW 1', 'GW 2', 'GW 3', 'AWS', 'GW1 soil'])
 
 # Keep only the outlet streamflow
 mod = mod[['Outlet']]

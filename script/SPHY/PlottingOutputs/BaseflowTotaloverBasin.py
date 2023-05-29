@@ -58,11 +58,13 @@ for raster_file in raster_files:
         total_values.append(total/30) # montlhy sum to m3/s
         
         plt.imshow(masked_data[0], cmap='gray')
+        
         plt.colorbar()
         plt.title(f'{raster_file} (Total: {total})')
         plt.show()
-        """
         
+'''        
 # Create a dataframe from the lists
 df = pd.DataFrame({'Raster_File': raster_file_names, 'Total_Value': total_values})
 df.to_csv(fig_dir+'/SPHY_Basin_BaseflowSum.csv')
+'''
