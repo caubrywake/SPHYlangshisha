@@ -1,0 +1,145 @@
+%% Import SPHY outputs
+close all
+clear all
+
+%%  Create time array basedon start and end time in config file
+dir = 'C:\SPHY3\'% location of config file
+fn = 'sphy_config_walter.cfg'% name of config file
+opts = detectImportOptions(strcat(dir,fn), 'FileType','text');
+x = readtable(strcat(dir,fn), opts);
+x = string(table2array(x(:,1)));
+
+% find the lines of the text file that matche the keyword strings and
+keyword = {'startyear','startmonth','startday','endyear','endmonth','endday'};
+for ii = 1:length(keyword)
+for i = 1:length(x)
+    a = x(i, :);
+    k = strfind(a,keyword(ii));
+   if ~isempty(k)
+      timevalues(1, ii) = str2double(regexp(a,'\d*','Match'));
+   end
+end
+end 
+starttime = datetime(timevalues(1:3));endtime = datetime(timevalues(4:6));
+t = datetime(starttime:caldays(1):endtime);
+clear keyword x timevalues a k i ii timevalues starttime endtime ots fn dir 
+
+%% Import Files
+% % Import names of location file
+% fn = 'NameLocations.txt'
+dir = 'F:\13_Utrecht\02_SPHY\analysis\run_20002019\'
+x =  readtable(strcat(dir, fn));
+LocationName = string(table2array(x(:,2)));
+clear x fn dir
+T = importfileSPHYtss(fn, 15, 
+
+% Import name of variables to analyze
+fn = 'VarNamesEval.txt'
+dir = 'F:\13_Utrecht\02_SPHY\analysis\run_20002019\'
+x =  readtable(strcat(dir, fn));
+vars = string(table2array(x(:,1)));
+clear x fn dir
+% import each variable in a loop
+dir = 'C:\SPHY3\output\'
+for i=1:length(vars)
+opts = detectImportOptions(strcat(dir,vars(i), '.tss'), 'FileType','text');
+x = readtable(strcat(dir,fn), opts);
+end
+%% as far as I got 2022-11-04
+
+
+% remove all the non valid datapoint
+a = T(:,1);
+b = find(a==1*10^31);
+T(b, :)=[];
+
+t(b, :)=[];
+figure
+plot(t, T(:,1:5),'linewidth', 2); hold on
+plot(t, T(:,6:11), ':', 'linewidth', 2); 
+legend (lab)
+% Variable snowmelt
+fn ='C:\SPHY3\output\SMelFMTS.tss';
+T = importfileSPHYtss(fn, 15);
+t1 = datetime('01-Jan-2010');
+t(:,1) = t1:caldays(1):t1+caldays(length(T)-1);
+
+
+%% GW level
+fn ='C:\SPHY3\output\GwlDTS.tss';
+T = importfileSPHYtss(fn, 15);
+t1 = datetime('01-Jan-2010');
+clear t
+t(:,1) = t1:caldays(1):t1+caldays(length(T)-1);
+
+% labels for locations (order of ID in attribute table)
+lab = {'langtang creek';'LS creek';'LS well bottom';...
+    'Shalbacum bottom';'Yala Top';'Yala Bottom';...
+    'Langtang Above LS';'Lirung';'Kyanjing';...
+    'UnderShalbacum';'LS well top'};
+
+% remove all the non valid datapoint
+figure
+plot(t, T(:,1:5),'linewidth', 2); hold on
+plot(t, T(:,6:11), ':', 'linewidth', 2); 
+legend (lab); ylim([-5 -4.9]);
+% Variable snowmelt
+fn ='C:\SPHY3\output\SMelFMTS.tss';
+T = importfileSPHYtss(fn, 15);
+t1 = datetime('01-Jan-2010');
+t(:,1) = t1:caldays(1):t1+caldays(length(T)-1);
+
+% labels for locations (order of ID in attribute table)
+lab = {'langtang creek';'LS creek';'LS well bottom';...
+    'Shalbacum bottom';'Yala Top';'Yala Bottom';...
+    'Langtang Above LS';'Lirung';'Kyanjing';...
+    'UnderShalbacum';'LS well top'};
+
+% remove all the non valid datapoint
+a = T(:,1);
+b = find(a==1*10^31);
+T(b, :)=[];
+t(b, :)=[];
+figure
+plot(t, T(:,1:5),'linewidth', 2); hold on
+plot(t, T(:,6:11), ':', 'linewidth', 2); 
+legend (lab)
+
+%% gw storage
+fn ='C:\SPHY3\output\GrndWMTS.tss';
+T = importfileSPHYtss(fn, 15);
+t1 = datetime('01-Jan-2010');
+clear t
+t(:,1) = t1:caldays(1):t1+caldays(length(T)-1);
+
+% remove all the non valid datapoint
+a = T(:,1); b = find(a==1*10^31);
+T(b, :)=[]; t(b, :)=[];
+figure
+plot(t, T(:,1:5),'linewidth', 2); hold on
+plot(t, T(:,6:11), ':', 'linewidth', 2); 
+legend (lab)
+
+%% total runogg
+fn ='C:\SPHY3\output\TotrMTS.tss';
+T = importfileSPHYtss(fn, 15);
+
+% remove all the non valid datapoint
+a = T(:,1); b = find(a==1*10^31);
+T(b, :)=[];% t(b, :)=[];
+figure
+plot(t, T(:,1:5),'linewidth', 2); hold on
+plot(t, T(:,6:11), ':', 'linewidth', 2); 
+legend (lab)
+
+%% groundwater rehacrge
+fn ='C:\SPHY3\output\GwreMTS.tss';
+T = importfileSPHYtss(fn, 15);
+
+% remove all the non valid datapoint
+a = T(:,1); b = find(a==1*10^31);
+T(b, :)=[];% t(b, :)=[];
+figure
+plot(t, T(:,1:5),'linewidth', 2); hold on
+plot(t, T(:,6:11), ':', 'linewidth', 2); 
+legend (lab)

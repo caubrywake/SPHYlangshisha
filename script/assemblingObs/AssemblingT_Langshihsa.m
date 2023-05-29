@@ -1,0 +1,178 @@
+%% Assembling Temperature for Langshisha AWS
+% I need min, max, mean daily temp
+% Create a master time series
+close all
+clear all
+
+tall = datetime('2012-01-01 01:00'):hours(1):datetime('2021-10-14 01:00');
+
+% loading Langshisha Pluvio
+fn = 'D:\UU\field_data\Pluvio\20211206_Pluvio_Langshisha.csv';
+T =  readtable(fn);
+day = datevec(table2array(T(:,1)));
+hour =datevec(table2array(T(:,2)));
+time_ls = datetime([day(:,1:3), hour(:,4:6)]);
+
+Ta_ls = table2array(T(:,6));
+plot(time_ls, Ta_ls)
+
+T = timetable(time_ls, Ta_ls);
+TT = retime(T, tall);
+Ta_all(:,1) = table2array(TT);
+
+% Load anothert time series to infil
+%Morimoto?
+fn = 'D:\UU\field_data\Pluvio\20211206_Pluvio_Morimoto.csv';
+T =  readtable(fn);
+day = datevec(table2array(T(:,1)));
+hour =datevec(table2array(T(:,2)));
+time_mm = datetime([day(:,1:3), hour(:,4:6)]);
+
+Ta_mm = table2array(T(:,6));
+plot(time_mm, Ta_mm)
+T = timetable(time_mm, Ta_mm);
+TT = retime(T, tall);
+Ta_all(:,2) = table2array(TT);
+
+% Yala
+fn = 'D:\UU\field_data\Pluvio\Pluvio_Yala.csv';
+T =  readtable(fn);
+day = datevec(table2array(T(:,1)));
+hour =datevec(table2array(T(:,2)));
+time_yl= datetime([day(:,1:3), hour(:,4:6)]);
+
+Ta_yl = table2array(T(:,5));
+plot(time_yl, Ta_yl)
+T = timetable(time_yl, Ta_yl);
+TT = retime(T, tall);
+Ta_all(:,3) = table2array(TT);
+
+% Ganja La
+fn = 'D:\UU\field_data\Pluvio\Pluvio_GanjaLa.csv';
+T =  readtable(fn);
+day = datevec(table2array(T(:,1)));
+hour =datevec(table2array(T(:,2)));
+time_gl= datetime([day(:,1:3), hour(:,4:6)]);
+
+Ta_gl = table2array(T(:,5));
+plot(time_gl, Ta_gl)
+
+T = timetable(time_gl, Ta_gl);
+TT = retime(T, tall);
+Ta_all(:,4) = table2array(TT);
+
+
+% Kyanjing AWS icimod
+fn = 'D:\UU\field_data\AWS\ICIMOD\Kyangjin_ICIMOD.csv';
+T =  readtable(fn);
+day = datevec(table2array(T(:,1)));
+hour =datevec(table2array(T(:,2)));
+time_ky= datetime([day(:,1:3), hour(:,4:6)]);
+
+Ta_ky = table2array(T(:,6));
+plot(time_ky, Ta_ky)
+
+T = timetable(time_ky, Ta_ky);
+TT = retime(T, tall);
+Ta_all(:,5) = table2array(TT);
+
+% Load ERA5 from Dhiraj (CRHM obs file)
+fn = 'D:\UU\field_data\AWSkyanjing20122016.txt';
+T =  readtable(fn);
+time_ky2= datetime([table2array(T(:,1:5)), zeros(height(T), 1)]);
+Ta_ky2 = table2array(T(:,6));
+plot(time_ky2, Ta_ky2);
+
+T = timetable(time_ky2, Ta_ky2);
+TT = retime(T, tall);
+Ta_all(:,6) = table2array(TT);
+
+plot(tall, Ta_all(:, [1, 6]))
+
+scatter(Ta_all(:,1), Ta_all(:,6))
+
+% remove nan from the two records
+x = Ta_all(:,6);
+y = Ta_all(:,1);
+ind = isnan(x) | isnan(y);
+x(ind) = [];
+y(ind) = [];
+% fit in a first lin regression
+fit1 = polyfit(x,y,1);
+y1 = polyval(fit1,  Ta_all(:,6));
+
+% plot result
+plot(tall,  Ta_all(:,6)); hold on
+plot(tall,  Ta_all(:,1)); hold on
+plot(tall,  y1);
+
+% replace the missing data in the langshihsa record with the kyanjing
+% corected values
+x = Ta_all(:,1);
+a = find(isnan(x));
+x(a)= y1(a);
+%nterpolate over the missing values
+x1 = fillmissing(x, 'linear');
+
+% Export infilled hourly values
+LanghshihsaTa_filledwithKyanjing_hourly = x1;
+time = tall';
+T = timetable (time, LanghshihsaTa_filledwithKyanjing_hourly);
+writetimetable(T,'D:\UU\field_data\processed\Ta_Ls_infilledwithKy_20120101_20211114.csv')
+
+% export infilled min, max, mean daily
+Tmax = retime(T, 'daily', 'max');
+Tmin = retime(T, 'daily', 'min');
+Tmean = retime(T, 'daily', 'mean');
+TT = join(Tmean, Tmin);
+TT = join(TT, Tmax);
+writetimetable(TT,'D:\UU\field_data\processed\Ta_Ls_meanminmax_20120101_20211114.csv')
+
+
+%% Deriving lapse rate
+% montlhy averages
+T= timetable (tall', Ta_all);
+TT = retime(T, 'monthly', 'mean');
+ta_mth = table2array(TT);
+t_mth = TT.Time;
+
+figure;
+plot(t_mth, ta_mth)
+legend ('ls', 'mm', 'yala', 'gl', 'kyanjing', 'ky2')
+
+plot(t_mth, (ta_mth+273.15)./(ta_mth(:,1)+273.15))
+legend ('ls', 'mm', 'yala', 'gl', 'kyanjing', 'ky2')
+
+ta_mth./ta_mth(:,1)
+% elevation
+el = [4452, 4919, 4831, 4361, 3862]
+
+timevec = datevec(t_mth);
+clear x y X Y Tgrad
+for i = 1:12
+    a = find(timevec(:, 2) == i);
+     subplot(3,4,i)
+     for ii = 1:5
+    y= ta_mth(a, ii);
+    x= ones(length(y), 1)*el(ii);
+   if ii == 1
+       X = x; Y = y;
+   else 
+       X = [X; x];
+ 
+       Y = [Y; y];
+   end  
+
+     end 
+        scatter(X, Y);  lsline
+        ind = isnan(Y) | isnan(X);
+        X(ind) = []; Y(ind) = [];
+         fit = polyfit(X, Y, 1)
+       Tgrad(i,1)=fit(1);
+end 
+
+month = {'Jan';'Feb';'March';'Apr';'May';'June';'July';'Aug';'Sep';'Oct';'Nov';'Dec'};
+Tlapserate_Cperm = Tgrad;
+
+T = table(month,Tlapserate_Cperm);
+writetable(T,'D:\UU\field_data\processed\Ta_tempgradient_permonth.csv')
